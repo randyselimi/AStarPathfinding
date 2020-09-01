@@ -52,8 +52,8 @@ namespace Pathfinding
             var startNode = nodeMap.GetNode(startPosition);
             var endNode = nodeMap.GetNode(endPosition);
 
-            startNode.w = CalculateWeight(startNode.position);
-            endNode.w = CalculateWeight(endNode.position);
+            startNode.Reset();
+            endNode.Reset();
 
             startNode.opened = true;
             modifiedNodes.Push(startNode);
@@ -61,9 +61,9 @@ namespace Pathfinding
 
 
             //Check if either startNode or endNode have a weight of infinity
-            if (float.IsInfinity(startNode.w) || float.IsInfinity(endNode.w))
+            //if (float.IsInfinity(startNode.w) || float.IsInfinity(endNode.w))
                 //If so, a path cannot exist so terminate pathfinding
-                return path;
+                //return path;
 
             while (openQueue.Count != 0)
             {
@@ -85,7 +85,11 @@ namespace Pathfinding
 
                 foreach (var adjacentNode in adjacentNodes)
                 {
-                    adjacentNode.w = CalculateWeight(adjacentNode.position);
+                    if (adjacentNode != endNode)
+                    {
+                        adjacentNode.w = CalculateWeight(adjacentNode.position);
+                    }
+
                     //Every Node in adjacentNodes will be modified so add it to modifiedNodes
                     modifiedNodes.Push(adjacentNode);
 
@@ -224,9 +228,10 @@ namespace Pathfinding
         //resets Node to default values
         internal void Reset()
         {
-            g = w;
+            w = 0;
+            g = 0;
             h = 0;
-            f = g + h;
+            f = 0;
             parent = null;
             closed = false;
             opened = false;
