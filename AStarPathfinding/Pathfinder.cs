@@ -42,7 +42,7 @@ namespace Pathfinding
             //Initalize MinHeap PriorityQueue
             IPriorityQueue<Node, float> openQueue = new BinaryHeap<Node, float>(PriorityQueueType.Minimum);
             //Initalize stack which tracks which Nodes are modified in finding path
-            var modifiedNodes = new Stack<Node>();
+            IPriorityQueue<Node, float> modifiedQueue = new BinaryHeap<Node, float>(PriorityQueueType.Minimum);
             //Initalize list which holds Nodes adjacent to currentNode
             var adjacentNodes = new List<Node>();
             //Initialize stack which contains path
@@ -55,8 +55,10 @@ namespace Pathfinding
             startNode.Reset();
             endNode.Reset();
 
+            startNode.h = calculateH(startPosition, endPosition);
+            startNode.f = startNode.h;
             startNode.opened = true;
-            modifiedNodes.Push(startNode);
+            modifiedQueue.Enqueue(startNode, startNode.h);
             openQueue.Enqueue(startNode, startNode.f);
 
 
@@ -75,8 +77,9 @@ namespace Pathfinding
                 //Check if this Node is the end position
                 if (currentNode.position.X == endPosition.X && currentNode.position.Y == endPosition.Y)
                 {
-                    //If so, set the endNode as this and break loop
+                    //If so, construct final path 
                     endNode = currentNode;
+                    path = Traceback(endNode);
                     break;
                 }
 
@@ -89,9 +92,6 @@ namespace Pathfinding
                     {
                         adjacentNode.w = CalculateWeight(adjacentNode.position);
                     }
-
-                    //Every Node in adjacentNodes will be modified so add it to modifiedNodes
-                    modifiedNodes.Push(adjacentNode);
 
                     //Check if Node has been closed or the Node has a weight of infinity
                     if (adjacentNode.closed || float.IsInfinity(adjacentNode.w))
@@ -113,6 +113,8 @@ namespace Pathfinding
 
                         //Add it to the openQueue
                         openQueue.Enqueue(adjacentNode, adjacentNode.f);
+                        //Every Node that is opened is modified so add Node to modifiedQueue
+                        modifiedQueue.Enqueue(adjacentNode, adjacentNode.h);
                     }
 
                     else
@@ -129,16 +131,20 @@ namespace Pathfinding
                 }
             }
 
-            //Once every Node in openQueue has been processed, construct final path from endNode
-            path = Traceback(endPosition, endNode);
+            //Check if no valid path is found
+            if (path.Count == 0)
+            {
+                //If so, find best possible path to Node closest to goal
+                path = Traceback(modifiedQueue.Peek);
+            }
 
             //Reset every modifiedNode for future pathfinding
-            while (modifiedNodes.Count != 0) modifiedNodes.Pop().Reset();
+            while (modifiedQueue.Count != 0) modifiedQueue.Dequeue().Reset();
 
             return path;
         }
 
-        private Stack<int[]> Traceback(Vector2 endPosition, Node endNode)
+        private Stack<int[]> Traceback(Node endNode)
         {
             var path = new Stack<int[]>();
             while (endNode != null)
