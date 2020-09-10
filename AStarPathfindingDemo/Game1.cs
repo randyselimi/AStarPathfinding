@@ -37,8 +37,8 @@ namespace AStarPathfindingDemo
         Vector2? previousEndPosition = null;
 
 
-        int mapWidth = 100;
-        int mapHeight = 100;
+        int mapWidth = 50;
+        int mapHeight = 50;
 
         public Game1()
         {

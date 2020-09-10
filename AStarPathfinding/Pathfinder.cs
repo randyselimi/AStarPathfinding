@@ -41,7 +41,7 @@ namespace Pathfinding
 
             //Initalize MinHeap PriorityQueue
             IPriorityQueue<Node, float> openQueue = new BinaryHeap<Node, float>(PriorityQueueType.Minimum);
-            //Initalize stack which tracks which Nodes are modified in finding path
+            //Initalize MinHeap PriorityQueue which tracks which Nodes are modified in finding path
             IPriorityQueue<Node, float> modifiedQueue = new BinaryHeap<Node, float>(PriorityQueueType.Minimum);
             //Initalize list which holds Nodes adjacent to currentNode
             var adjacentNodes = new List<Node>();
@@ -58,7 +58,7 @@ namespace Pathfinding
             startNode.h = calculateH(startPosition, endPosition);
             startNode.f = startNode.h;
             startNode.opened = true;
-            modifiedQueue.Enqueue(startNode, startNode.h);
+            modifiedQueue.Enqueue(startNode, startNode.f);
             openQueue.Enqueue(startNode, startNode.f);
 
 
@@ -114,7 +114,7 @@ namespace Pathfinding
                         //Add it to the openQueue
                         openQueue.Enqueue(adjacentNode, adjacentNode.f);
                         //Every Node that is opened is modified so add Node to modifiedQueue
-                        modifiedQueue.Enqueue(adjacentNode, adjacentNode.h);
+                        modifiedQueue.Enqueue(adjacentNode, adjacentNode.f);
                     }
 
                     else
